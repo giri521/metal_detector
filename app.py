@@ -1,98 +1,81 @@
-from flask import Flask, render_template, Response, request, redirect, url_for
-import cv2
-import numpy as np
 import os
-from tensorflow.keras.models import load_model
-import gdown
+import numpy as np
+import cv2
+import tensorflow as tf
+from flask import Flask, render_template, request, jsonify
 
+# Initialize Flask app
 app = Flask(__name__)
 
-UPLOAD_FOLDER = 'static/uploads'
-MODEL_FOLDER = 'models'
-MODEL_PATH = os.path.join(MODEL_FOLDER, 'metal_model.h5')
-MODEL_URL = "https://drive.google.com/uc?id=1_ApPcrk2NAcC6ddxjktaTYjVbtCBfj0A"
+# Define model path (make sure this file exists locally)
+MODEL_PATH = "model/metal_model.tflite"
 
-# Ensure folders exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(MODEL_FOLDER, exist_ok=True)
+# Load the TFLite model
+interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
+interpreter.allocate_tensors()
 
-# Download the model if not present
-if not os.path.exists(MODEL_PATH):
-    print("Downloading model from Google Drive...")
-    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+# Get input and output tensor details
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
-# Load the model (if needed for future use)
-model = load_model(MODEL_PATH)
+# Class labels - adjust as per your model training
+class_names = ['Gold', 'Silver', 'Copper', 'Iron']
 
-camera = cv2.VideoCapture(0)
+# Preprocess image for prediction
+def preprocess_image(image):
+    img = cv2.resize(image, (224, 224))  # Resize to model input size
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = img.astype(np.float32) / 255.0  # Normalize
+    img = np.expand_dims(img, axis=0)     # Add batch dimension
+    return img
 
-# Define HSV ranges for each metal
-def detect_metal_color(hsv_img):
-    metal_ranges = {
-        "Gold": ((20, 100, 100), (30, 255, 255)),
-        "Copper": ((5, 100, 50), (20, 255, 200)),
-        "Silver": ((0, 0, 180), (180, 60, 255)),
-        "Iron_or_Steel": ((0, 0, 80), (180, 50, 180)),
-    }
+# Predict using the TFLite model
+def predict(image):
+    input_data = preprocess_image(image)
+    interpreter.set_tensor(input_details[0]['index'], input_data)
+    interpreter.invoke()
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+    predicted_index = np.argmax(output_data)
+    confidence = float(np.max(output_data))
+    return class_names[predicted_index], confidence
 
-    metal_counts = {}
-
-    for metal, (lower, upper) in metal_ranges.items():
-        mask = cv2.inRange(hsv_img, np.array(lower), np.array(upper))
-        count = cv2.countNonZero(mask)
-        metal_counts[metal] = count
-
-    detected = max(metal_counts, key=metal_counts.get)
-    return detected if metal_counts[detected] > 500 else "Unknown"
-
-def gen_frames():
-    while True:
-        success, frame = camera.read()
-        if not success:
-            break
-        resized = cv2.resize(frame, (300, 300))
-        hsv = cv2.cvtColor(resized, cv2.COLOR_BGR2HSV)
-        detected = detect_metal_color(hsv)
-
-        cv2.putText(frame, f"Detected: {detected}", (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-@app.route('/')
-def root():
-    return redirect(url_for('home'))
-
-@app.route('/home')
+# Home page
+@app.route("/")
 def home():
-    return render_template('home.html')
+    return render_template("home.html")
 
-@app.route('/detect', methods=['GET', 'POST'])
-def index():
-    prediction = None
-    filename = None
+# Detect page
+@app.route("/detect")
+def detect():
+    return render_template("index.html")
 
-    if request.method == 'POST':
-        file = request.files['image']
-        if file:
-            filename = file.filename
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(filepath)
+# Predict API endpoint (POST with image file)
+@app.route("/predict", methods=["POST"])
+def predict_image():
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"})
 
-            img = cv2.imread(filepath)
-            img = cv2.resize(img, (300, 300))
-            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-            prediction = detect_metal_color(hsv)
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "Empty filename"})
 
-    return render_template('index.html', prediction=prediction, filename=filename)
+    try:
+        # Convert uploaded image to OpenCV format
+        npimg = np.frombuffer(file.read(), np.uint8)
+        image = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        # Make prediction
+        label, confidence = predict(image)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+        return jsonify({
+            "label": label,
+            "confidence": round(confidence * 100, 2)
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+# Run the Flask app (bind to 0.0.0.0 for Render)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
