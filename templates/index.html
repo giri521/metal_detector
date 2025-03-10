@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🔍 AI-Powered Metal Detector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <style>
+        /* RESET & BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0d0d0d;
+            color: #eaeaea;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #FFD700;
+            text-shadow: 0 0 8px #FFD700, 0 0 15px #ffaa00;
+        }
+
+        /* CONTAINER STYLES */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        .section {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 20px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+            padding: 25px;
+            flex: 1 1 450px;
+            transition: 0.3s ease;
+        }
+
+        .section:hover {
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+        }
+
+        /* FORM STYLES */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #111;
+            border: 2px dashed #555;
+            color: #bbb;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 300px;
+            transition: 0.3s ease;
+        }
+
+        input[type="file"]:hover {
+            border-color: #FFD700;
+        }
+
+        button {
+            background: linear-gradient(135deg, #FFD700, #ffaa00);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 12px #ffaa00;
+            transition: 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #ffcc00, #ff9900);
+            transform: scale(1.05);
+        }
+
+        h2, h3 {
+            margin-top: 15px;
+            text-shadow: 0 0 5px #00ffcc;
+        }
+
+        .prediction span {
+            color: #00ff88;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        img.preview {
+            width: 100%;
+            max-width: 300px;
+            margin-top: 15px;
+            border-radius: 12px;
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .live-feed img {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 12px;
+            border: 3px solid #00ccff;
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.4);
+            margin-top: 15px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 AI-Powered Metal Detector</h1>
+
+    <div class="container">
+        <!-- Upload Section -->
+        <div class="section">
+            <form method="POST" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*" required>
+                <button type="submit">🔎 Detect from Image</button>
+            </form>
+
+            {% if filename %}
+                <h3>Uploaded Image:</h3>
+                <img src="{{ url_for('static', filename='uploads/' + filename) }}" alt="Uploaded Image" class="preview">
+            {% endif %}
+
+            {% if prediction %}
+                <h2 class="prediction">Detected Metal: <span>{{ prediction }}</span></h2>
+            {% endif %}
+        </div>
+
+        <!-- Live Camera Section -->
+        <div class="section live-feed">
+            <h3>🎥 Live Camera Detection</h3>
+            <img src="{{ url_for('video_feed') }}" alt="Live Camera Feed">
+        </div>
+    </div>
+</body>
+</html>

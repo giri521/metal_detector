@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Metal Detector Home</title>
+    <style>
+        body {
+            background-color: #0d0d0d;
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #FFD700;
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: #FFD700;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 40px;
+            transition: 0.3s ease;
+            box-shadow: 0 0 15px #ffd70090;
+        }
+
+        .btn:hover {
+            background-color: #ffcc00;
+            transform: scale(1.05);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .card {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            width: 350px;
+            box-shadow: 0 0 20px #FFD70020;
+            padding: 20px;
+            text-align: left;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 25px #FFD70050;
+        }
+
+        .card h2 {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .card img {
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 2px solid #333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🧲 AI-Powered Metal Detector</h1>
+
+    <a href="/detect"><button class="btn">🔍 Detect Metal</button></a>
+
+    <p>Explore and learn about the properties of common metals used in daily life before detecting them with AI.</p>
+
+    <div class="container">
+
+        <!-- Gold -->
+        <div class="card">
+            <h2>Gold</h2>
+            <p><strong>Color:</strong> Bright yellow<br>
+               <strong>Uses:</strong> Jewelry, electronics, currency<br>
+               <strong>Features:</strong> Non-reactive, high value<br><br>
+               Gold is a precious metal used for wealth storage and luxury items. It is an excellent conductor and does not tarnish, making it ideal for high-end electronics and investments.</p>
+            <img src="{{ url_for('static', filename='images/gold2.jpg') }}" alt="Gold">
+        </div>
+
+        <!-- Silver -->
+        <div class="card">
+            <h2>Silver</h2>
+            <p><strong>Color:</strong> White metallic<br>
+               <strong>Uses:</strong> Jewelry, mirrors, electronics, medical<br>
+               <strong>Features:</strong> Highest electrical conductivity<br><br>
+               Silver is known for its brilliant shine and conductivity. It is widely used in solar panels, circuit boards, and antimicrobial medical applications.</p>
+            <img src="{{ url_for('static', filename='images/silver2.jpg') }}" alt="Silver">
+        </div>
+
+        <!-- Copper -->
+        <div class="card">
+            <h2>Copper</h2>
+            <p><strong>Color:</strong> Reddish brown<br>
+               <strong>Uses:</strong> Wiring, motors, plumbing<br>
+               <strong>Features:</strong> Flexible, conducts heat and electricity<br><br>
+               Copper has been used since ancient times for tools and decoration. Today it's essential in renewable energy, construction, and industry due to its conductivity and affordability.</p>
+            <img src="{{ url_for('static', filename='images/copper2.jpg') }}" alt="Copper">
+        </div>
+
+        <!-- Iron -->
+        <div class="card">
+            <h2>Iron</h2>
+            <p><strong>Color:</strong> Grey<br>
+               <strong>Uses:</strong> Construction, tools, vehicles<br>
+               <strong>Features:</strong> Strong, magnetic, prone to rust<br><br>
+               Iron is a fundamental building material. It's widely used for its strength, especially in construction and machinery, but it needs protection from rust.</p>
+            <img src="{{ url_for('static', filename='images/iron.jpg') }}" alt="Iron">
+        </div>
+
+        <!-- Steel -->
+        <div class="card">
+            <h2>Steel</h2>
+            <p><strong>Color:</strong> Silvery grey<br>
+               <strong>Uses:</strong> Buildings, bridges, appliances<br>
+               <strong>Features:</strong> Durable, rust-resistant, alloy of iron<br><br>
+               Steel is made by refining iron and combining it with carbon. It is stronger and more corrosion-resistant, used in everything from skyscrapers to kitchenware.</p>
+            <img src="{{ url_for('static', filename='images/steel.jpg') }}" alt="Steel">
+        </div>
+
+    </div>
+</body>
+</html>
