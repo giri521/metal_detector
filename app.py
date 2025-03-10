@@ -2,11 +2,27 @@ from flask import Flask, render_template, Response, request, redirect, url_for
 import cv2
 import numpy as np
 import os
+from tensorflow.keras.models import load_model
+import gdown
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = 'static/uploads'
+MODEL_FOLDER = 'models'
+MODEL_PATH = os.path.join(MODEL_FOLDER, 'metal_model.h5')
+MODEL_URL = "https://drive.google.com/uc?id=1_ApPcrk2NAcC6ddxjktaTYjVbtCBfj0A"
+
+# Ensure folders exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(MODEL_FOLDER, exist_ok=True)
+
+# Download the model if not present
+if not os.path.exists(MODEL_PATH):
+    print("Downloading model from Google Drive...")
+    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+
+# Load the model (if needed for future use)
+model = load_model(MODEL_PATH)
 
 camera = cv2.VideoCapture(0)
 
